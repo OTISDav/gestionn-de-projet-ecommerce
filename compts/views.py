@@ -16,15 +16,24 @@ class RegisterView(APIView):
             return Response({'token': token.key}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class GoogleLoginView(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
-    serializer_class = GoogleLoginSerializer
+class GoogleLoginView(APIView):
+    """
+    Vue pour gérer la connexion via Google OAuth2.
+    """
+    def post(self, request, *args, **kwargs):
+        serializer = GoogleLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
-    def post(self, request):
+    """
+    Vue pour gérer la connexion classique.
+    """
+    def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key}, status=status.HTTP_200_OK)
+            # Retourner la réponse après validation
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        # Si les données ne sont pas valides, retourner les erreurs
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
